@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tarefas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>𝓁𝒾𝓈𝓉𝒶 𝒹𝑒 𝓉𝒶𝓇𝑒𝒻𝒶𝓈</h1>
+    <input type="text" id="taskInput" placeholder="Adicione uma tarefa...">
+    <button id="addTaskButton">Adicionar Tarefa</button>
+    <ul id="taskList"></ul>
+    <button id="saveTasksButton">Salvar Tarefas</button>
+    <button id="resetTasksButton">Reiniciar Tarefas</button>
+
+    <script>
+        const taskInput = document.getElementById('taskInput');
+        const addTaskButton = document.getElementById('addTaskButton');
+        const taskList = document.getElementById('taskList');
+        const saveTasksButton = document.getElementById('saveTasksButton');
+        const resetTasksButton = document.getElementById('resetTasksButton');
+
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.textContent = task.text;
+                if (task.done) {
+                    li.classList.add('done');
+                }
+                
+                // Botão de marcar como feito
+                const doneButton = document.createElement('button');
+                doneButton.textContent = task.done ? 'Desmarcar' : 'Marcar como Feito';
+                doneButton.className = 'done-button';
+                doneButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    task.done = !task.done;
+                    renderTasks();
+                });
+                
+                // Botão de excluir
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Excluir';
+                deleteButton.style.marginLeft = '10px';
+                deleteButton.style.backgroundColor = '#d9534f';
+                deleteButton.style.color = '#fff';
+                deleteButton.style.border = 'none';
+                deleteButton.style.borderRadius = '5px';
+                
+                deleteButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    tasks.splice(index, 1);
+                    renderTasks();
+                });
+
+                li.appendChild(doneButton);
+                li.appendChild(deleteButton);
+                taskList.appendChild(li);
+            });
+        }
+
+        addTaskButton.addEventListener('click', () => {
+            const taskText = taskInput.value.trim();
+            if (taskText) {
+                tasks.push({ text: taskText, done: false });
+                taskInput.value = '';
+                renderTasks();
+            }
+        });
+
+        saveTasksButton.addEventListener('click', () => {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            alert('Tarefas salvas com sucesso!');
+        });
+
+        resetTasksButton.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja reiniciar todas as tarefas?')) {
+                tasks = [];
+                localStorage.removeItem('tasks');
+                renderTasks();
+            }
+        });
+
+        renderTasks();
+    </script>
+</body>
+</html>
